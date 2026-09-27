@@ -2,10 +2,10 @@
 Generates a themed SVG "NeetCode Progress" card from a NeetCode.io
 GitHub-Sync repository (structure: <topic>/<problem-id>/submission-N.<ext>).
 
-The card shows NeetCode 250 progress by difficulty, recent submissions
+The card shows NeetCode All progress by difficulty, recent submissions
 (date, language, problem name) in the same row layout as a LeetCode stats
 card, and a submission-activity heatmap built from real commit dates.
-Difficulty comes from scripts/neetcode250.json (slug to Easy/Medium/Hard).
+Difficulty comes from scripts/neetcode_all.json (slug to Easy/Medium/Hard).
 NeetCode's GitHub Sync makes one commit per synced submission, so the
 heatmap uses the repo's git history instead of an API NeetCode doesn't expose.
 
@@ -76,7 +76,7 @@ RECENT_LIMIT = 4
 NAME_LIMIT = 34
 HEAT_WEEKS = 12
 HEAT_GAP = 3
-MAP_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "neetcode250.json")
+MAP_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "neetcode_all.json")
 
 
 def fetch_tree():
@@ -153,11 +153,11 @@ def collect_stats(tree):
 
 
 def load_difficulty_map(path=MAP_PATH):
-    """NeetCode 250 slug -> Easy/Medium/Hard. Slugs match GitHub Sync folder names."""
+    """NeetCode All slug -> Easy/Medium/Hard. Slugs match GitHub Sync folder names."""
     with open(path, encoding="utf-8") as f:
         data = json.load(f)
     if not isinstance(data, dict):
-        raise ValueError("neetcode250.json must be an object of slug to difficulty")
+        raise ValueError("neetcode_all.json must be an object of slug to difficulty")
     bad = [slug for slug, diff in data.items() if diff not in DIFFICULTIES]
     if bad:
         raise ValueError("unknown difficulty for: " + ", ".join(bad[:5]))
@@ -172,7 +172,7 @@ def difficulty_totals(mapping):
 
 
 def count_solved(problems, mapping):
-    """Problems missing from the NeetCode 250 map count as Easy."""
+    """Problems missing from the NeetCode All map count as Easy."""
     solved = {name: 0 for name in DIFFICULTIES}
     for slug in problems:
         solved[mapping.get(slug, "Easy")] += 1
@@ -478,9 +478,11 @@ def _self_check():
     assert mapping["concatenation-of-array"] == "Easy"
     assert mapping["duplicate-integer"] == "Easy"
     assert mapping["remove-element"] == "Easy"
+    assert mapping["max-consecutive-ones"] == "Easy"
+    assert mapping["replace-elements-with-greatest-element-on-right-side"] == "Easy"
     assert mapping["trapping-rain-water"] == "Hard"
     totals = difficulty_totals(mapping)
-    assert totals == {"Easy": 60, "Medium": 155, "Hard": 35}
+    assert totals == {"Easy": 224, "Medium": 600, "Hard": 149}
     solved = count_solved({"concatenation-of-array", "not-a-problem"}, mapping)
     assert solved["Easy"] == 2 and solved["Medium"] == 0 and solved["Hard"] == 0
 
